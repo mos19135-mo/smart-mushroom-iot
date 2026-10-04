@@ -3,83 +3,89 @@
   "author": "Smart Mushroom Project",
   "editor": "wokwi",
   "parts": [
-    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 50, "left": 0, "attrs": {} },
     {
       "type": "wokwi-dht22",
       "id": "dht",
-      "top": -120,
-      "left": -120,
-      "attrs": { "temperature": "16.3", "humidity": "6.5" }
+      "top": -153.3,
+      "left": -245.4,
+      "attrs": { "temperature": "26.5", "humidity": "85.0" }
     },
-    { "type": "wokwi-potentiometer", "id": "pot_moist", "top": -100, "left": 160, "attrs": {} },
+    { "type": "wokwi-photoresistor-sensor", "id": "ldr", "top": 41.6, "left": -412, "attrs": {} },
     {
-      "type": "wokwi-photoresistor-sensor",
-      "id": "ldr",
-      "top": 99.2,
-      "left": -258.4,
-      "attrs": {}
+      "type": "wokwi-potentiometer",
+      "id": "pot_moist",
+      "top": 200.3,
+      "left": -336.2,
+      "attrs": { "label": "Moisture" }
     },
-    { "type": "wokwi-slide-switch", "id": "sw_float", "top": 158, "left": 175.9, "attrs": {} },
+    {
+      "type": "wokwi-slide-switch",
+      "id": "sw_float",
+      "top": 359.6,
+      "left": -150.5,
+      "attrs": { "label": "Water Level" }
+    },
     {
       "type": "wokwi-pushbutton",
       "id": "btn_estop",
-      "top": 240,
-      "left": 0,
-      "attrs": { "color": "red" }
+      "top": 350,
+      "left": 180,
+      "attrs": { "color": "red", "label": "E-STOP" }
     },
     {
       "type": "wokwi-led",
       "id": "led_mist",
-      "top": -180,
-      "left": 0,
+      "top": -150,
+      "left": 130,
       "attrs": { "color": "blue", "label": "Mist Pump" }
     },
     {
       "type": "wokwi-led",
       "id": "led_fan",
-      "top": -180,
-      "left": 50,
+      "top": -150,
+      "left": 200,
       "attrs": { "color": "green", "label": "Vent Fan" }
     },
     {
       "type": "wokwi-led",
       "id": "led_spray",
-      "top": -180,
-      "left": 100,
+      "top": -150,
+      "left": 270,
       "attrs": { "color": "cyan", "label": "Spray" }
     },
     {
       "type": "wokwi-led",
       "id": "led_siren",
-      "top": 240,
-      "left": 100,
+      "top": 236.4,
+      "left": 253.4,
       "attrs": { "color": "red", "label": "SIREN" }
     }
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
     [ "esp:RX", "$serialMonitor:TX", "", [] ],
-    [ "esp:GND.1", "dht:GND", "black", [ "v0" ] ],
-    [ "esp:3V3", "dht:VCC", "red", [ "v0" ] ],
-    [ "esp:15", "dht:SDA", "green", [ "v0" ] ],
-    [ "esp:GND.1", "pot_moist:GND", "black", [ "v0" ] ],
-    [ "esp:3V3", "pot_moist:VCC", "red", [ "v0" ] ],
-    [ "esp:35", "pot_moist:SIG", "orange", [ "v0" ] ],
-    [ "esp:GND.1", "ldr:GND", "black", [ "v0" ] ],
-    [ "esp:3V3", "ldr:VCC", "red", [ "v0" ] ],
-    [ "esp:34", "ldr:AO", "yellow", [ "v0" ] ],
-    [ "esp:GND.2", "sw_float:1", "black", [ "v0" ] ],
-    [ "esp:4", "sw_float:2", "blue", [ "v0" ] ],
-    [ "esp:GND.2", "btn_estop:1.1", "black", [ "v0" ] ],
-    [ "esp:21", "btn_estop:2.1", "red", [ "v0" ] ],
-    [ "esp:2", "led_mist:A", "blue", [ "v0" ] ],
-    [ "esp:GND.1", "led_mist:C", "black", [ "v0" ] ],
-    [ "esp:13", "led_fan:A", "green", [ "v0" ] ],
-    [ "esp:GND.1", "led_fan:C", "black", [ "v0" ] ],
-    [ "esp:14", "led_spray:A", "cyan", [ "v0" ] ],
-    [ "esp:GND.1", "led_spray:C", "black", [ "v0" ] ],
-    [ "esp:12", "led_siren:A", "red", [ "v0" ] ],
-    [ "esp:GND.2", "led_siren:C", "black", [ "v0" ] ]
+    [ "esp:3V3", "dht:VCC", "red", [ "v-50", "h-235.01" ] ],
+    [ "esp:GND.1", "dht:GND", "black", [ "v-35", "h-175" ] ],
+    [ "esp:15", "dht:SDA", "green", [ "v-50", "h-140" ] ],
+    [ "esp:3V3", "ldr:VCC", "red", [ "h-80", "v-20" ] ],
+    [ "esp:GND.1", "ldr:GND", "black", [ "h-70", "v-10" ] ],
+    [ "esp:34", "ldr:AO", "gold", [ "h-60", "v0" ] ],
+    [ "esp:3V3", "pot_moist:VCC", "red", [ "v120", "h-215.81", "v70" ] ],
+    [ "esp:GND.1", "pot_moist:GND", "black", [ "v135", "h-190" ] ],
+    [ "esp:35", "pot_moist:SIG", "orange", [ "v150", "h-160" ] ],
+    [ "esp:GND.2", "sw_float:1", "black", [ "v40", "h-273.56", "v274.8" ] ],
+    [ "esp:4", "sw_float:2", "blue", [ "v60", "h-196.76", "v139.6" ] ],
+    [ "esp:GND.2", "btn_estop:1.1", "black", [ "v50", "h130" ] ],
+    [ "esp:21", "btn_estop:2.1", "red", [ "v70", "h120" ] ],
+    [ "esp:2", "led_mist:A", "blue", [ "v-70", "h15" ] ],
+    [ "esp:GND.1", "led_mist:C", "black", [ "v-35", "h65" ] ],
+    [ "esp:13", "led_fan:A", "green", [ "v-90", "h110" ] ],
+    [ "esp:GND.1", "led_fan:C", "black", [ "v-35", "h135" ] ],
+    [ "esp:14", "led_spray:A", "cyan", [ "v-110", "h195" ] ],
+    [ "esp:GND.1", "led_spray:C", "black", [ "v-35", "h205" ] ],
+    [ "esp:12", "led_siren:A", "red", [ "v30", "h225.79", "v64", "h48" ] ],
+    [ "esp:GND.2", "led_siren:C", "black", [ "v30", "h139.24", "v169.6" ] ]
   ],
   "dependencies": {}
 }
