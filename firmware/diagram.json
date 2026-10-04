@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "author": "Smart Mushroom Project",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht",
+      "top": -120,
+      "left": -120,
+      "attrs": { "temperature": "16.3", "humidity": "6.5" }
+    },
+    { "type": "wokwi-potentiometer", "id": "pot_moist", "top": -100, "left": 160, "attrs": {} },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr",
+      "top": 99.2,
+      "left": -258.4,
+      "attrs": {}
+    },
+    { "type": "wokwi-slide-switch", "id": "sw_float", "top": 158, "left": 175.9, "attrs": {} },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn_estop",
+      "top": 240,
+      "left": 0,
+      "attrs": { "color": "red" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_mist",
+      "top": -180,
+      "left": 0,
+      "attrs": { "color": "blue", "label": "Mist Pump" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_fan",
+      "top": -180,
+      "left": 50,
+      "attrs": { "color": "green", "label": "Vent Fan" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_spray",
+      "top": -180,
+      "left": 100,
+      "attrs": { "color": "cyan", "label": "Spray" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_siren",
+      "top": 240,
+      "left": 100,
+      "attrs": { "color": "red", "label": "SIREN" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "esp:GND.1", "dht:GND", "black", [ "v0" ] ],
+    [ "esp:3V3", "dht:VCC", "red", [ "v0" ] ],
+    [ "esp:15", "dht:SDA", "green", [ "v0" ] ],
+    [ "esp:GND.1", "pot_moist:GND", "black", [ "v0" ] ],
+    [ "esp:3V3", "pot_moist:VCC", "red", [ "v0" ] ],
+    [ "esp:35", "pot_moist:SIG", "orange", [ "v0" ] ],
+    [ "esp:GND.1", "ldr:GND", "black", [ "v0" ] ],
+    [ "esp:3V3", "ldr:VCC", "red", [ "v0" ] ],
+    [ "esp:34", "ldr:AO", "yellow", [ "v0" ] ],
+    [ "esp:GND.2", "sw_float:1", "black", [ "v0" ] ],
+    [ "esp:4", "sw_float:2", "blue", [ "v0" ] ],
+    [ "esp:GND.2", "btn_estop:1.1", "black", [ "v0" ] ],
+    [ "esp:21", "btn_estop:2.1", "red", [ "v0" ] ],
+    [ "esp:2", "led_mist:A", "blue", [ "v0" ] ],
+    [ "esp:GND.1", "led_mist:C", "black", [ "v0" ] ],
+    [ "esp:13", "led_fan:A", "green", [ "v0" ] ],
+    [ "esp:GND.1", "led_fan:C", "black", [ "v0" ] ],
+    [ "esp:14", "led_spray:A", "cyan", [ "v0" ] ],
+    [ "esp:GND.1", "led_spray:C", "black", [ "v0" ] ],
+    [ "esp:12", "led_siren:A", "red", [ "v0" ] ],
+    [ "esp:GND.2", "led_siren:C", "black", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}

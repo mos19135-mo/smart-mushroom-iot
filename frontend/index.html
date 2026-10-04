@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Mushroom Farm Dashboard</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #121820; color: #fff; margin: 0; padding: 20px; }
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #2a3b50; padding-bottom: 15px; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+    .card { background: #1c2635; padding: 20px; border-radius: 12px; text-align: center; border: 1px solid #2d3f56; }
+    .card h3 { margin: 0 0 10px; font-size: 15px; color: #8fa7c2; }
+    .card .val { font-size: 30px; font-weight: bold; color: #00d2be; }
+    .controls { background: #1c2635; padding: 20px; border-radius: 12px; margin-top: 20px; }
+    .btn { padding: 10px 18px; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; margin-right: 10px; font-weight: bold; }
+    .btn-primary { background: #007bff; color: white; }
+    .btn-danger { background: #dc3545; color: white; }
+    .btn-outline { background: transparent; border: 1px solid #fff; color: white; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .badge { padding: 5px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; }
+    .bg-green { background: #28a745; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>🍄 Smart Mushroom Indoor Farm Monitor</h2>
+    <div>
+      <span id="badgeMode" class="badge bg-green">AUTO MODE</span>
+      <span id="badgeEstop" class="badge" style="display:none; background:#dc3545;">E-STOP ACTIVE</span>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>อุณหภูมิ</h3>
+      <div id="valTemp" class="val">-- °C</div>
+    </div>
+    <div class="card">
+      <h3>ความชื้นอากาศ</h3>
+      <div id="valHum" class="val">-- %</div>
+    </div>
+    <div class="card">
+      <h3>ความชื้นก้อนเพาะ</h3>
+      <div id="valMoist" class="val">-- %</div>
+    </div>
+    <div class="card">
+      <h3>ระดับแสง</h3>
+      <div id="valLight" class="val">-- %</div>
+    </div>
+    <div class="card">
+      <h3>ระดับน้ำในถัง</h3>
+      <div id="valWater" class="val">ปกติ</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <h3>⚙️ แผงควบคุมระบบ (Control Panel)</h3>
+    <button id="btnToggleMode" class="btn btn-primary" onclick="toggleMode()">สลับโหมด (Auto / Manual)</button>
+    <button id="btnEstop" class="btn btn-danger" onclick="toggleEstop()">🚨 EMERGENCY STOP</button>
+    <hr style="border: 0.5px solid #2d3f56; margin: 20px 0;">
+    <div>
+      <label>ควบคุมสั่งการตรง (เปิดใช้งานเฉพาะโหมด MANUAL):</label><br><br>
+      <button id="btnMist" class="btn btn-outline" onclick="toggleActuator('mist_pump')" disabled>ปั๊มพ่นหมอก: OFF</button>
+      <button id="btnFan" class="btn btn-outline" onclick="toggleActuator('fan')" disabled>พัดลมระบาย: OFF</button>
+      <button id="btnSpray" class="btn btn-outline" onclick="toggleActuator('spray')" disabled>สเปรย์หล่อเย็น: OFF</button>
+    </div>
+  </div>
+
+  <script>
+    let currentMode = "AUTO";
+    let isEstop = false;
+    let states = { mist_pump: false, fan: false, spray: false };
+
+    async function fetchTelemetry() {
+      try {
+        const res = await fetch('/api/telemetry?device_id=MUSHROOM_FARM_01');
+        const data = await res.json();
+        if (!data.temperature) return;
+
+        document.getElementById('valTemp').innerText = data.temperature + " °C";
+        document.getElementById('valHum').innerText = data.humidity + " %";
+        document.getElementById('valMoist').innerText = data.moisture + " %";
+        document.getElementById('valLight').innerText = data.light_level + " %";
+        document.getElementById('valWater').innerText = data.water_full ? "ปกติ" : "น้ำหมด (เตือน)";
+        document.getElementById('valWater').style.color = data.water_full ? "#00d2be" : "#dc3545";
+
+        currentMode = data.mode;
+        isEstop = data.estop;
+
+        document.getElementById('badgeMode').innerText = currentMode + " MODE";
+        document.getElementById('badgeMode').className = "badge " + (currentMode === "AUTO" ? "bg-green" : "bg-primary");
+        document.getElementById('badgeEstop').style.display = isEstop ? "inline-block" : "none";
+
+        const isLocked = (currentMode === "AUTO" || isEstop);
+        document.getElementById('btnMist').disabled = isLocked;
+        document.getElementById('btnFan').disabled = isLocked;
+        document.getElementById('btnSpray').disabled = isLocked;
+
+        states.mist_pump = data.mist_pump;
+        states.fan = data.fan;
+        states.spray = data.spray;
+
+        document.getElementById('btnMist').innerText = "ปั๊มพ่นหมอก: " + (states.mist_pump ? "ON" : "OFF");
+        document.getElementById('btnFan').innerText = "พัดลมระบาย: " + (states.fan ? "ON" : "OFF");
+        document.getElementById('btnSpray').innerText = "สเปรย์หล่อเย็น: " + (states.spray ? "ON" : "OFF");
+      } catch (e) {}
+    }
+
+    async function sendControl(payload) {
+      await fetch('/api/control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_id: "MUSHROOM_FARM_01", ...payload })
+      });
+    }
+
+    function toggleMode() {
+      sendControl({ mode: currentMode === "AUTO" ? "MANUAL" : "AUTO" });
+    }
+
+    function toggleEstop() {
+      sendControl({ estop: !isEstop });
+    }
+
+    function toggleActuator(actuator) {
+      sendControl({ [actuator]: !states[actuator] });
+    }
+
+    setInterval(fetchTelemetry, 1500);
+  </script>
+</body>
+</html>
