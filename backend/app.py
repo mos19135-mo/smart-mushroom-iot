@@ -84,6 +84,29 @@ def send_control():
     mqtt_client.publish(topic, json.dumps(body))
     return jsonify({"status": "command_published", "topic": topic, "payload": body})
 
+@app.route('/api/history', methods=['GET'])
+def get_history():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    # ดึงข้อมูล 20 รายการล่าสุด เรียงจากเก่าไปใหม่เพื่อพล็อตกราฟตามลำดับเวลา
+    c.execute('''
+        SELECT timestamp, temperature, humidity 
+        FROM (
+            SELECT timestamp, temperature, humidity 
+            FROM telemetry 
+            ORDER BY id DESC LIMIT 20
+        ) ORDER BY timestamp ASC
+    ''')
+    rows = c.fetchall()
+    conn.close()
+
+    history_data = {
+        "labels": [r[0].split()[1] if ' ' in str(r[0]) else str(r[0]) for r in rows],  # เอาเฉพาะเวลา HH:MM:SS
+        "temperatures": [r[1] for r in rows],
+        "humidities": [r[2] for r in rows]
+    }
+    return jsonify(history_data)
+
 if __name__ == "__main__":
     init_db()
     app.run(host="0.0.0.0", port=5000, debug=True)

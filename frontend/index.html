@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <meta charset="UTF-8">
   <title>Smart Mushroom Farm Dashboard</title>
   <style>
@@ -64,6 +65,12 @@
       <button id="btnSpray" class="btn btn-outline" onclick="toggleActuator('spray')" disabled>สเปรย์หล่อเย็น: OFF</button>
     </div>
   </div>
+  <div style="background-color: #1e293b; padding: 20px; border-radius: 12px; margin-top: 24px;">
+    <h3 style="color: #f8fafc; margin-top: 0; margin-bottom: 16px;">📈 ประวัติอุณหภูมิและความชื้นย้อนหลัง (Telemetry History)</h3>
+    <div style="position: relative; height: 320px; width: 100%;">
+        <canvas id="historyChart"></canvas>
+    </div>
+</div>
 
   <script>
     let currentMode = "AUTO";
@@ -126,6 +133,90 @@
     }
 
     setInterval(fetchTelemetry, 1500);
+    let historyChart = null;
+
+function initChart() {
+    const ctx = document.getElementById('historyChart').getContext('2d');
+    historyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'อุณหภูมิ (°C)',
+                    data: [],
+                    borderColor: '#38bdf8',
+                    backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                    yAxisID: 'yTemp',
+                    tension: 0.3,
+                    fill: true
+                },
+                {
+                    label: 'ความชื้นอากาศ (%RH)',
+                    data: [],
+                    borderColor: '#4ade80',
+                    backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                    yAxisID: 'yHum',
+                    tension: 0.3,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    ticks: { color: '#94a3b8' },
+                    grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                },
+                yTemp: {
+                    type: 'linear',
+                    position: 'left',
+                    min: 15,
+                    max: 45,
+                    ticks: { color: '#38bdf8' },
+                    grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                    title: { display: true, text: '°C', color: '#38bdf8' }
+                },
+                yHum: {
+                    type: 'linear',
+                    position: 'right',
+                    min: 20,
+                    max: 100,
+                    ticks: { color: '#4ade80' },
+                    grid: { drawOnChartArea: false },
+                    title: { display: true, text: '%RH', color: '#4ade80' }
+                }
+            },
+            plugins: {
+                legend: { labels: { color: '#f8fafc' } }
+            }
+        }
+    });
+}
+
+async function updateChartData() {
+    try {
+        const res = await fetch('/api/history');
+        const data = await res.json();
+        if (historyChart && data.labels.length > 0) {
+            historyChart.data.labels = data.labels;
+            historyChart.data.datasets[0].data = data.temperatures;
+            historyChart.data.datasets[1].data = data.humidities;
+            historyChart.update();
+        }
+    } catch (err) {
+        console.error('Failed to load chart history:', err);
+    }
+}
+
+// เรียกฟังก์ชันเมื่อเปิดหน้าเว็บ
+window.addEventListener('DOMContentLoaded', () => {
+    initChart();
+    updateChartData();
+    setInterval(updateChartData, 5000); // อัปเดตกราฟอัตโนมัติทุกๆ 5 วินาที
+});
   </script>
 </body>
 </html>
